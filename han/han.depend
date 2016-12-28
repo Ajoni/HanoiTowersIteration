@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1482952488 source:c:\cpp\han\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+
