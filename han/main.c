@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <windows.h>
 
+FILE *file;
+
 typedef struct tower_seg
 {
     int size;
@@ -124,27 +126,25 @@ void print_towers(Tower *top1,Tower *top2,Tower *top3)
 
 void print_toFile(Tower *top1,Tower *top2,Tower *top3, FILE *file)
 {
-    FILE *out;
-    out=fopen("hanoi.txt","w");
-    fprintf(out,"I\tII\tIII\n\n");
+    fprintf(file,"I\tII\tIII\n\n");
     while(top1!=NULL || top2!=NULL || top3!=NULL)
     {
         if(top1!=NULL)
-            {fprintf(out,"%d\t",top1->size);
+            {fprintf(file,"%d\t",top1->size);
             top1=top1->seg_under;
-            }else fprintf(out,"\t");
+            }else fprintf(file,"\t");
 
         if(top2!=NULL)
-            {fprintf(out,"%d\t",top2->size);
+            {fprintf(file,"%d\t",top2->size);
             top2=top2->seg_under;
-            }else fprintf(out,"\t");
+            }else fprintf(file,"\t");
 
         if(top3!=NULL)
 
-            {fprintf(out,"%d\n",top3->size);
+            {fprintf(file,"%d\n",top3->size);
             top3=top3->seg_under;
-            }else fprintf(out,"\n");
-    }
+            }else fprintf(file,"\n");
+    } fprintf(file,"\n");
 }
 
 //void updatePointers(Tower **tow1old, Tower **tow2old, Tower **tow1, Tower **tow2)
@@ -152,27 +152,6 @@ void print_toFile(Tower *top1,Tower *top2,Tower *top3, FILE *file)
 //
 //}
 
-//void user_move(Tower **top1, Tower **top2, Tower **top3, Tower **being_moved, Tower **to)
-//{
-//    if(*being_moved==*top1)
-//    {
-//        if(*to==*top2)      // top2 and top3 can be both null
-//        {
-//            move(top1,top2);
-//        }else move(top1,top3);
-//    }else if(*being_moved==*top2)
-//            {
-//                if(*to==*top1)
-//                   {
-//                move(top2,top1);
-//                   }else move(top2,top3);
-//
-//            }else if(*to==*top1)
-//                    {
-//                        move(top3,top1);
-//                    }else move(top3,top2);
-//
-//}
 
 void user_move(Tower **top1, Tower **top2, Tower **top3,int selected, int target)
 {
@@ -204,16 +183,16 @@ void user_solve(Tower *hanoi_first, int seg_amount)
     int segs_top3,selected,target,valid_move;
     char c;
 
-    //printf("Podaj opoznienie (w milisekundach) miedzy kolejnymi ruchami: ");scanf("%d",&wait);system("cls");
 
     while(segs_top3!=seg_amount)
     {
         print_towers(top1,top2,top3);
+        print_toFile(top1,top2,top3,file);
         while(selected<1 || selected>3 || target<1 || target>3 || selected==target || valid_move!=1)
               {
                     valid_move=1;
 
-                    printf("\nPodaj nr wiezy do przesunieca: ");
+                    printf("\nPodaj nr stosu z ktorego przesunac: ");
                     if(scanf("%d",&selected)==0)
                     {
                         do{
@@ -221,6 +200,7 @@ void user_solve(Tower *hanoi_first, int seg_amount)
                         }while(!isdigit(c));
                         ungetc(c,stdin);
                     }
+
                     printf("\nPodaj nr stosu bedacy celem: "); scanf("%d",&target);
 
                         if(selected==1)
@@ -245,7 +225,7 @@ void user_solve(Tower *hanoi_first, int seg_amount)
                                     to=top3;
                                 }
 
-                        // add detection if out of scope
+
 
                         if(being_moved==NULL)
                         {
@@ -270,7 +250,8 @@ void user_solve(Tower *hanoi_first, int seg_amount)
         user_move(&top1,&top2,&top3,selected,target);
         segs_top3=count(top3);
     }
-    printf("rip");
+    print_towers(top1,top2,top3);
+    print_toFile(top1,top2,top3,file);
 }
 
 int solve_hanoi(Tower *hanoi_first,int seg_amount)
@@ -380,12 +361,28 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
 
 int main()
 {
-    FILE *file;
     file=fopen("hanoi.txt","w");
-    int amount=USRinput_seg_amount();
-    Tower *top1=create_tower(amount );
-    //solve_hanoi(top1,amount);
-    user_solve(top1,amount);
+    int amount, select=1;
+    char c;
+
+    while(select!=0)
+    {
+        amount=USRinput_seg_amount();
+        Tower *top1=create_tower(amount );
+        system("cls");
+        printf("0 Koniec programu\n1 Zobacz rozwiazanie\n2 Sprobuj rozwiazac\nPodaj numer: ");
+        if(scanf("%d",&select)==0)
+        {
+            do{
+                c=getchar();
+            }while(!isdigit(c));
+            ungetc(c,stdin);
+        }
+        if(select==1)
+                {system("cls");solve_hanoi(top1,amount);system("cls");}
+        if(select==2)
+                {system("cls");user_solve(top1,amount);system("cls");}
+    }
     close(file);
     return 0;
 }
