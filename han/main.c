@@ -50,37 +50,76 @@ int USRinput_seg_amount()
     return seg_amount;
 }
 
-Tower *can_be_moved(Tower *Tow,Tower *otherTow, Tower **target)
+int can_be_moved(Tower *top1,Tower *top2, Tower *top3, int *target)
 {
-    if(Tow!=NULL)
+    if(top1!=NULL)
+    {
+        if(top1->size!=1)
+        {
+            if(top2!=NULL)
             {
-            if(otherTow==NULL)
-                    {
-                        *target=otherTow;
-                        return Tow;
-                    }else
-                            if(otherTow->size > Tow->size)
-                            {
-                               *target=otherTow;
-                                return Tow;
-                            }
-                                else
-                                {
-                                    *target=Tow;
-                                    return otherTow;
-                                }
-            }
-            else
-                if(otherTow!=NULL)
-                    {
-                        *target=Tow;
-                        return otherTow;
-                    }else
-                        {
-                            *target=NULL;
-                            return NULL;
-                        }
+                if(top1->size < top2->size)
+                {
+                    *target=2; return 1;
+                }
+            }else {*target=2; return 1;}
 
+            if(top3!=NULL)
+            {
+                if(top1->size < top3->size)
+                {
+                    *target=3; return 1;
+                }
+            }else {*target=3; return 1;}
+        }
+    }
+
+    if(top2!=NULL)
+    {
+        if(top2->size!=1)
+        {
+            if(top1!=NULL)
+            {
+                if(top2->size < top1->size)
+                {
+                    *target=1; return 2;
+                }
+            }else {*target=1; return 2;}
+
+            if(top3!=NULL)
+            {
+                if(top2->size < top3->size)
+                {
+                    *target=3; return 2;
+                }
+            }else {*target=3; return 2;}
+        }
+    }
+
+    if(top3!=NULL)
+    {
+        if(top3->size!=1)
+        {
+            if(top1!=NULL)
+            {
+                if(top3->size < top1->size)
+                {
+                    *target=1; return 3;
+                }
+            }else {*target=1; return 3;}
+
+            if(top2!=NULL)
+            {
+                if(top3->size < top2->size)
+                {
+                    *target=2; return 3;
+                }
+            }else {*target=2; return 3;}
+        }
+    }
+
+    if(1)
+        printf("very bad");
 }
 
 int count(Tower *tow)
@@ -146,12 +185,6 @@ void print_toFile(Tower *top1,Tower *top2,Tower *top3, FILE *file)
             }else fprintf(file,"\n");
     } fprintf(file,"\n");
 }
-
-//void updatePointers(Tower **tow1old, Tower **tow2old, Tower **tow1, Tower **tow2)
-//{
-//
-//}
-
 
 void user_move(Tower **top1, Tower **top2, Tower **top3,int selected, int target)
 {
@@ -261,101 +294,85 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
     if(seg_amount<1)
         return -1;
 
-    Tower *top1, *top2=NULL, *top3=NULL,*to_move=NULL,*target=NULL;
-    int segs_top3=0;
+    Tower *top1, *top2=NULL, *top3=NULL;
+    int segs_top3=0, from,to;
     top1=hanoi_first;
-    if(seg_amount%2==0)                                                 //if %2==0 then next tower is the one on right
-    {
+
        while(segs_top3!=seg_amount)
        {
             print_towers(top1,top2,top3);
             Sleep(wait);
             segs_top3=0;
              if(top1!=NULL)
-                 {if(top1->size==1)                  //moving smallest seg to the next tower
+                 {if(top1->size==1 && segs_top3!=seg_amount)                  //moving smallest seg to the next tower
                  {
+                     if(seg_amount%2==0)
+                        move(&top1,&top2);else move(&top1,&top3);
+
+                        printf("W TOP1"); Sleep(750);
                      segs_top3=count(top3);
-                            printf("W TOP1"); Sleep(750);
-                     move(&top1,&top2);
                      print_towers(top1,top2,top3);
                      Sleep(wait);
 
-                     to_move=can_be_moved(top1,top3,&target);
-                             if(to_move==top1)
-                             {
-                                 move(&to_move,&target);
-                                 top1=to_move;top3=target; //updating pointers
-                             }
-                                        else
-                                        {
-                                            move(&to_move,&target);
-                                            top3=to_move;top1=target;
-                                        }
+                     if(segs_top3!= seg_amount)
+                     {
+//                         printf("Waht"); Sleep(750);
+                     from=can_be_moved(top1,top2,top3,&to);
+                     user_move(&top1,&top2,&top3,from,to);
                             print_towers(top1,top2,top3);
                             Sleep(wait);
+                     }
                  }
              }
-                 if(top2!=NULL)
-                     {if(top2->size==1)                  //moving smallest seg to the next tower
-                     {
-                         move(&top2,&top3);
-                         segs_top3=count(top3);
+         if(top2!=NULL)
+             {if(top2->size==1 && segs_top3!=seg_amount)                  //moving smallest seg to the next tower
+             {
+                 if(seg_amount%2==0)
+                 move(&top2,&top3);else move(&top2,&top1);
 
-                         print_towers(top1,top2,top3);
-                         Sleep(wait);
+                 segs_top3=count(top3);
+                 print_towers(top1,top2,top3);
+                 Sleep(wait);
 
-                         //if(segs_top3!=seg_amount)
-                         //{
-                             printf("W TOP2"); Sleep(750);
-                             to_move=can_be_moved(top1,top2,&target);
-                                 if(to_move==top1)
-                                 {
-                                    move(&to_move,&target);
-                                    top1=to_move;top2=target;
-                                 }
-                                         else
-                                            {
-                                                move(&to_move,&target);
-                                                top2=to_move;top1=target;
-                                            }
+                     printf("W TOP2"); Sleep(750);
+                if(segs_top3!= seg_amount)
+                {
+                    from=can_be_moved(top1,top2,top3,&to);
+                    user_move(&top1,&top2,&top3,from,to);
+                    segs_top3=count(top3);
 
-                            print_towers(top1,top2,top3);
-                            Sleep(wait);
-                        //}
-                     }
-                 }
-                     if(top3!=NULL)
-                         {if(top3->size==1)                  //moving smallest seg to the next tower
-                         {
-                            segs_top3=count(top3);
-                            printf("W TOP3"); Sleep(750);
-                            if( segs_top3== seg_amount)
-                            {
-                                break;
-                            }
-                             move(&top3,&top1);
-                             print_towers(top1,top2,top3);
-                             Sleep(wait);
+                    print_towers(top1,top2,top3);
+                    Sleep(wait);
+                }
+             }
+         }
 
-                             to_move=can_be_moved(top2,top3,&target);
-                                     if(top2==to_move)
-                                     {
-                                        move(&to_move,&target);
-                                        top2=to_move;top3=target;
-                                     }
-                                             else
-                                                 {
-                                                     move(&to_move,&target);
-                                                     top3=to_move;top2=target;
-                                                 }
-                            print_towers(top1,top2,top3);
-                            Sleep(wait);
-                         }
-                     }
+        if(top3!=NULL)
+             {if(top3->size==1 && segs_top3!=seg_amount)                  //moving smallest seg to the next tower
+             {
+                printf("W TOP3"); Sleep(750);
+
+                 if(seg_amount%2==0)
+                 move(&top3,&top1);else move(&top3,&top2);
+
+                segs_top3=count(top3);
+                 print_towers(top1,top2,top3);
+                 Sleep(wait);
+
+                segs_top3=count(top3);
+                if(segs_top3!= seg_amount)
+                {
+                    from=can_be_moved(top1,top2,top3,&to);
+                    user_move(&top1,&top2,&top3,from,to);
+                    print_towers(top1,top2,top3);
+                    Sleep(wait);
+                }
+
+             }
+         }
 
 
        }
-    }
     return 0;
 }
 
