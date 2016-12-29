@@ -213,7 +213,7 @@ void user_solve(Tower *hanoi_first, int seg_amount)
     Tower *top1,*top2=NULL,*top3=NULL, *being_moved, *to;
     top1=hanoi_first;
 
-    int segs_top3,selected,target,valid_move;
+    int segs_top3,selected,target,valid_move,moves_counter=0;
     char c;
 
 
@@ -280,47 +280,62 @@ void user_solve(Tower *hanoi_first, int seg_amount)
                         }
               }valid_move=0;
 
-        user_move(&top1,&top2,&top3,selected,target);
+        user_move(&top1,&top2,&top3,selected,target);moves_counter++;
         segs_top3=count(top3);
     }
     print_towers(top1,top2,top3);
     print_toFile(top1,top2,top3,file);
+    printf("Liczba ruchow: %d\nNacisnij dowolny klawisz by kontynuowac",moves_counter);getchar();getchar();
 }
 
 int solve_hanoi(Tower *hanoi_first,int seg_amount)
 {
-    int wait;
-    printf("Podaj opoznienie (w milisekundach) miedzy kolejnymi ruchami: ");scanf("%d",&wait);system("cls");
+    int wait, segs_top3=0, from,to,mode=-1;
+    char c;
+
+    printf("0 - Kolejne ruchy odbeda sie po podanej przez ciebie liczbie milisekund\n1 - Kolejne ruchy odbeda sie po kliknieci dowolnego przycisku\n");
+    while(mode!=0 && mode!=1)
+    {
+        if(scanf("%d",&mode)==0)
+       {
+           do{
+            c=getchar();
+           }while(!isdigit(c));
+           ungetc(c,stdin);
+       }
+    }
+
+    if(mode==0)
+    {printf("Podaj opoznienie miedzy kolejnymi ruchami: ");scanf("%d",&wait);system("cls");}
+
     if(seg_amount<1)
         return -1;
 
     Tower *top1, *top2=NULL, *top3=NULL;
-    int segs_top3=0, from,to;
     top1=hanoi_first;
 
        while(segs_top3!=seg_amount)
        {
             print_towers(top1,top2,top3);
-            Sleep(wait);
+            if(mode==0)Sleep(wait);else {getchar();}
             segs_top3=0;
+
              if(top1!=NULL)
                  {if(top1->size==1 && segs_top3!=seg_amount)                  //moving smallest seg to the next tower
                  {
                      if(seg_amount%2==0)
                         move(&top1,&top2);else move(&top1,&top3);
 
-                        printf("W TOP1"); Sleep(750);
                      segs_top3=count(top3);
                      print_towers(top1,top2,top3);
-                     Sleep(wait);
+                     if(mode==0)Sleep(wait);else {getchar();}
 
                      if(segs_top3!= seg_amount)
                      {
-//                         printf("Waht"); Sleep(750);
                      from=can_be_moved(top1,top2,top3,&to);
                      user_move(&top1,&top2,&top3,from,to);
                             print_towers(top1,top2,top3);
-                            Sleep(wait);
+                            if(mode==0)Sleep(wait);else {getchar();}
                      }
                  }
              }
@@ -332,9 +347,8 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
 
                  segs_top3=count(top3);
                  print_towers(top1,top2,top3);
-                 Sleep(wait);
+                 if(mode==0)Sleep(wait);else {getchar();}
 
-                     printf("W TOP2"); Sleep(750);
                 if(segs_top3!= seg_amount)
                 {
                     from=can_be_moved(top1,top2,top3,&to);
@@ -342,7 +356,7 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
                     segs_top3=count(top3);
 
                     print_towers(top1,top2,top3);
-                    Sleep(wait);
+                    if(mode==0)Sleep(wait);else {getchar();}
                 }
              }
          }
@@ -350,14 +364,13 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
         if(top3!=NULL)
              {if(top3->size==1 && segs_top3!=seg_amount)                  //moving smallest seg to the next tower
              {
-                printf("W TOP3"); Sleep(750);
 
                  if(seg_amount%2==0)
                  move(&top3,&top1);else move(&top3,&top2);
 
                 segs_top3=count(top3);
                  print_towers(top1,top2,top3);
-                 Sleep(wait);
+                 if(mode==0)Sleep(wait);else {getchar();}
 
                 segs_top3=count(top3);
                 if(segs_top3!= seg_amount)
@@ -365,7 +378,7 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
                     from=can_be_moved(top1,top2,top3,&to);
                     user_move(&top1,&top2,&top3,from,to);
                     print_towers(top1,top2,top3);
-                    Sleep(wait);
+                    if(mode==0)Sleep(wait);else {getchar();}
                 }
 
              }
