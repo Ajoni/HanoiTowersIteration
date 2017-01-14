@@ -26,7 +26,7 @@ Tower* create_tower(int seg_amount)
         hanoi_last->size=i;
     }
          //last segment
-        hanoi_last->seg_under=NULL;             //marking as last seg by setting vaulue of next to NULL
+        hanoi_last->seg_under=NULL;
         return hanoi_first;
 }
 
@@ -133,7 +133,7 @@ int count(Tower *tow)
     return amount;
 }
 
-void move(Tower **from, Tower **to)
+void swap(Tower **from, Tower **to)
 {
     if(*from!=NULL)
     {
@@ -186,25 +186,25 @@ void print_toFile(Tower *top1,Tower *top2,Tower *top3, FILE *file)
     } fprintf(file,"\n");
 }
 
-void user_move(Tower **top1, Tower **top2, Tower **top3,int selected, int target)
+void move(Tower **top1, Tower **top2, Tower **top3,int selected, int target)
 {
     if(selected==1)
     {
         if(target==2)      // top2 and top3 can be both null
         {
-            move(top1,top2);
-        }else move(top1,top3);
+            swap(top1,top2);
+        }else swap(top1,top3);
     }else if(selected==2)
             {
                 if(target==1)
                    {
-                move(top2,top1);
-                   }else move(top2,top3);
+                swap(top2,top1);
+                   }else swap(top2,top3);
 
             }else if(target==1)
                     {
-                        move(top3,top1);
-                    }else move(top3,top2);
+                        swap(top3,top1);
+                    }else swap(top3,top2);
 
 }
 
@@ -212,7 +212,6 @@ void user_solve(Tower *hanoi_first, int seg_amount)
 {
     Tower *top1,*top2=NULL,*top3=NULL, *being_moved, *to;
     top1=hanoi_first;
-
     int segs_top3,selected,target,valid_move,moves_counter=0;
     char c;
 
@@ -259,7 +258,6 @@ void user_solve(Tower *hanoi_first, int seg_amount)
                                 }
 
 
-
                         if(being_moved==NULL)
                         {
                             valid_move=0;
@@ -280,12 +278,12 @@ void user_solve(Tower *hanoi_first, int seg_amount)
                         }
               }valid_move=0;
 
-        user_move(&top1,&top2,&top3,selected,target);moves_counter++;
+        move(&top1,&top2,&top3,selected,target);moves_counter++;
         segs_top3=count(top3);
     }
     print_towers(top1,top2,top3);
     print_toFile(top1,top2,top3,file);
-    printf("Liczba ruchow: %d\nNacisnij dowolny klawisz by kontynuowac",moves_counter);getchar();getchar();
+    printf("Liczba ruchow: %d\nNacisnij dowolny klawisz by kontynuowac",moves_counter);getch();
 }
 
 int solve_hanoi(Tower *hanoi_first,int seg_amount)
@@ -314,28 +312,30 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
     Tower *top1, *top2=NULL, *top3=NULL;
     top1=hanoi_first;
 
+            print_towers(top1,top2,top3);   print_toFile(top1,top2,top3,file);
+            if(mode==0)Sleep(wait);else {getch();}
        while(segs_top3!=seg_amount)
        {
-            print_towers(top1,top2,top3);
-            if(mode==0)Sleep(wait);else {getchar();}
             segs_top3=0;
 
              if(top1!=NULL)
                  {if(top1->size==1 && segs_top3!=seg_amount)                  //moving smallest seg to the next tower
                  {
                      if(seg_amount%2==0)
-                        move(&top1,&top2);else move(&top1,&top3);
+                        swap(&top1,&top2);else swap(&top1,&top3);
 
                      segs_top3=count(top3);
-                     print_towers(top1,top2,top3);
-                     if(mode==0)Sleep(wait);else {getchar();}
+                     print_towers(top1,top2,top3);  print_toFile(top1,top2,top3,file);
+                     if(mode==0)Sleep(wait);else {getch();}
 
                      if(segs_top3!= seg_amount)
                      {
-                     from=can_be_moved(top1,top2,top3,&to);
-                     user_move(&top1,&top2,&top3,from,to);
-                            print_towers(top1,top2,top3);
-                            if(mode==0)Sleep(wait);else {getchar();}
+                        from=can_be_moved(top1,top2,top3,&to);
+                        move(&top1,&top2,&top3,from,to);
+                        segs_top3=count(top3);
+
+                        print_towers(top1,top2,top3);   print_toFile(top1,top2,top3,file);
+                        if(mode==0)Sleep(wait);else {getch();}
                      }
                  }
              }
@@ -343,20 +343,20 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
              {if(top2->size==1 && segs_top3!=seg_amount)                  //moving smallest seg to the next tower
              {
                  if(seg_amount%2==0)
-                 move(&top2,&top3);else move(&top2,&top1);
+                 swap(&top2,&top3);else swap(&top2,&top1);
 
                  segs_top3=count(top3);
-                 print_towers(top1,top2,top3);
-                 if(mode==0)Sleep(wait);else {getchar();}
+                 print_towers(top1,top2,top3);  print_toFile(top1,top2,top3,file);
+                 if(mode==0)Sleep(wait);else {getch();}
 
                 if(segs_top3!= seg_amount)
                 {
                     from=can_be_moved(top1,top2,top3,&to);
-                    user_move(&top1,&top2,&top3,from,to);
+                    move(&top1,&top2,&top3,from,to);
                     segs_top3=count(top3);
 
-                    print_towers(top1,top2,top3);
-                    if(mode==0)Sleep(wait);else {getchar();}
+                    print_towers(top1,top2,top3);   print_toFile(top1,top2,top3,file);
+                    if(mode==0)Sleep(wait);else {getch();}
                 }
              }
          }
@@ -366,19 +366,20 @@ int solve_hanoi(Tower *hanoi_first,int seg_amount)
              {
 
                  if(seg_amount%2==0)
-                 move(&top3,&top1);else move(&top3,&top2);
+                 swap(&top3,&top1);else swap(&top3,&top2);
 
                 segs_top3=count(top3);
-                 print_towers(top1,top2,top3);
-                 if(mode==0)Sleep(wait);else {getchar();}
+                 print_towers(top1,top2,top3);  print_toFile(top1,top2,top3,file);
+                 if(mode==0)Sleep(wait);else {getch();}
 
-                segs_top3=count(top3);
                 if(segs_top3!= seg_amount)
                 {
                     from=can_be_moved(top1,top2,top3,&to);
-                    user_move(&top1,&top2,&top3,from,to);
-                    print_towers(top1,top2,top3);
-                    if(mode==0)Sleep(wait);else {getchar();}
+                    move(&top1,&top2,&top3,from,to);
+                    segs_top3=count(top3);
+
+                    print_towers(top1,top2,top3);   print_toFile(top1,top2,top3,file);
+                    if(mode==0)Sleep(wait);else {getch();}
                 }
 
              }
@@ -409,9 +410,9 @@ int main()
             ungetc(c,stdin);
         }
         if(select==1)
-                {system("cls");solve_hanoi(top1,amount);system("cls");}
+                {system("cls");solve_hanoi(top1,amount);system("cls");fprintf(file,"\n////////////////////\n\n");}
         if(select==2)
-                {system("cls");user_solve(top1,amount);system("cls");}
+                {system("cls");user_solve(top1,amount);system("cls");fprintf(file,"\n////////////////////\n\n");}
     }
     close(file);
     return 0;
